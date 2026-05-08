@@ -1,15 +1,14 @@
-//import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-// 1. Declarar fora do main (Escopo Global do ficheiro)
-enum Avaliacao {
-  ac, // Usar letras minúsculas é a convenção (camelCase)
-  as,
-  ap
-}
+import 'app.dart';
+import 'apresentacao/providers/gestao_notas_provider.dart';
 
 void main() {
-  // 2. O acesso ao .values e .name está correto para versões Dart 2.17+
-  for (var nota in Avaliacao.values) {
-    print("Tipo de avaliação: ${nota.name}");
-  }
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => GestaoNotasProvider.memoria()..carregarTudo(),
+      child: const GestaoNotasApp(),
+    ),
+  );
 }

@@ -1,45 +1,38 @@
+class Disciplina {
+  final String id;
+  final String nome;
+  final String codigo;
+  final String descricao;
 
+  const Disciplina({
+    required this.id,
+    required this.nome,
+    required this.codigo,
+    required this.descricao,
+  });
 
-class Disciplina{
-
-  static final List<Disciplina> disciplinas = [];
-
-  String? _id;
-  String? _nome;
-  DateTime _dataDeCriacao;
-  String _curso;
-
-  Disciplina({required String nome,
-    required DateTime dataDeCriacao,
-    required String curso}):
-        _nome = nome,
-        this._dataDeCriacao = dataDeCriacao,
-        this._curso = curso
-  ;
-
-  String get curso => _curso;
-
-  set curso(String value) {
-    _curso = value;
+  Disciplina copyWith({String? id, String? nome, String? codigo, String? descricao}) {
+    return Disciplina(
+      id: id ?? this.id,
+      nome: nome ?? this.nome,
+      codigo: codigo ?? this.codigo,
+      descricao: descricao ?? this.descricao,
+    );
   }
 
-  DateTime get dataDeCriacao => _dataDeCriacao;
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'nome': nome,
+        'codigo': codigo,
+        'descricao': descricao,
+      };
 
-  set dataDeCriacao(DateTime value) {
-    _dataDeCriacao = value;
+  factory Disciplina.fromMap(Map<String, dynamic> map) {
+    return Disciplina(
+      id: map['id'] ?? '',
+      nome: map['nome'] ?? '',
+      codigo: map['codigo'] ?? '',
+      descricao: map['descricao'] ?? '',
+    );
   }
-
-  String get nome => _nome!;
-
-  set nome(String value) {
-    _nome = value;
-  }
-
-  String get id => _id ?? 'ainda não foi gravado';
-
-  set id(String value) {
-    _id = value;
-  }
-
-
 }

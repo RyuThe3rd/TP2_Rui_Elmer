@@ -1,35 +1,54 @@
+enum TipoAvaliacao { teste, trabalho, exame, projeto }
 
-import 'dart:math';
+class Avaliacao {
+  final String id;
+  final String disciplinaId;
+  final String titulo;
+  final TipoAvaliacao tipo;
+  final double peso;
 
-enum Avaliacoes {
-  ac,
-  as,
-  ap
-}
+  const Avaliacao({
+    required this.id,
+    required this.disciplinaId,
+    required this.titulo,
+    required this.tipo,
+    required this.peso,
+  });
 
-class Avaliacao{
+  Avaliacao copyWith({
+    String? id,
+    String? disciplinaId,
+    String? titulo,
+    TipoAvaliacao? tipo,
+    double? peso,
+  }) {
+    return Avaliacao(
+      id: id ?? this.id,
+      disciplinaId: disciplinaId ?? this.disciplinaId,
+      titulo: titulo ?? this.titulo,
+      tipo: tipo ?? this.tipo,
+      peso: peso ?? this.peso,
+    );
+  }
 
-  static final List<Avaliacao> listaAvaliacoes = [];
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'disciplinaId': disciplinaId,
+        'titulo': titulo,
+        'tipo': tipo.name,
+        'peso': peso,
+      };
 
-  String? _id;
-  Avaliacoes _tipo;
-  DateTime _data;
-  String _estudante;
-  String _estudanteId;
-  String _disciplina;
-  double _nota;
-
-  Avaliacao({required Avaliacoes tipo,
-  required String estudante,
-    required String estudanteId,
-    required String disciplina,
-  required double nota}):
-      _estudanteId = estudanteId,
-      _tipo = tipo,
-  _disciplina = disciplina,
-        _data = DateTime.now(),
-        _estudante = estudante,
-  _nota = nota;
-
-
+  factory Avaliacao.fromMap(Map<String, dynamic> map) {
+    return Avaliacao(
+      id: map['id'] ?? '',
+      disciplinaId: map['disciplinaId'] ?? '',
+      titulo: map['titulo'] ?? '',
+      tipo: TipoAvaliacao.values.firstWhere(
+        (t) => t.name == map['tipo'],
+        orElse: () => TipoAvaliacao.teste,
+      ),
+      peso: (map['peso'] ?? 0).toDouble(),
+    );
+  }
 }

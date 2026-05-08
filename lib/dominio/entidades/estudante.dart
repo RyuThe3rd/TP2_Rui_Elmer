@@ -1,62 +1,38 @@
-
 class Estudante {
+  final String id;
+  final String nome;
+  final String numero;
+  final String curso;
 
-  static final List<Estudante> estudantes = [];
+  const Estudante({
+    required this.id,
+    required this.nome,
+    required this.numero,
+    required this.curso,
+  });
 
-  String? _id;
-  String? _nome;
-  String _apelido;
-  DateTime _dataDeInscricao;
-  String _turma;
-  String _curso;
-
-  String get id => _id ?? 'ainda não foi gravado';
-
-  set id(String value) {
-    _id = value;
+  Estudante copyWith({String? id, String? nome, String? numero, String? curso}) {
+    return Estudante(
+      id: id ?? this.id,
+      nome: nome ?? this.nome,
+      numero: numero ?? this.numero,
+      curso: curso ?? this.curso,
+    );
   }
 
-  Estudante({required String nome,
-    required String apelido,
-    required DateTime dataDeInscricao,
-    required String turma,
-    required String curso}):
-      _nome = nome,
-        this._apelido = apelido,
-        this._dataDeInscricao = dataDeInscricao,
-        this._turma = turma,
-        this._curso = curso
-  ;
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'nome': nome,
+        'numero': numero,
+        'curso': curso,
+      };
 
-  String get nome => _nome!;
-
-  String get curso => _curso;
-
-  set curso(String value) {
-    _curso = value;
+  factory Estudante.fromMap(Map<String, dynamic> map) {
+    return Estudante(
+      id: map['id'] ?? '',
+      nome: map['nome'] ?? '',
+      numero: map['numero'] ?? '',
+      curso: map['curso'] ?? '',
+    );
   }
-
-  String get turma => _turma;
-
-  set turma(String value) {
-    _turma = value;
-  }
-
-  DateTime get dataDeInscricao => _dataDeInscricao;
-
-  set dataDeInscricao(DateTime value) {
-    _dataDeInscricao = value;
-  }
-
-  String get apelido => _apelido;
-
-  set apelido(String value) {
-    _apelido = value;
-  }
-
-  set nome(String value) {
-    _nome = value;
-  }
-
-
 }
