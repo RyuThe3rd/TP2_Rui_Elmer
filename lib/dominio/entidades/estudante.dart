@@ -1,8 +1,6 @@
 
 class Estudante {
 
-  static final List<Estudante> estudantes = [];
-
   String? _id;
   String? _nome;
   String _apelido;
@@ -10,17 +8,20 @@ class Estudante {
   String _turma;
   String _curso;
 
-  String get id => _id ?? 'ainda não foi gravado';
+  String get id => _id ?? '-1';
 
   set id(String value) {
     _id = value;
   }
 
-  Estudante({required String nome,
+  Estudante({
+    String? id,
+    required String nome,
     required String apelido,
     required DateTime dataDeInscricao,
     required String turma,
     required String curso}):
+      _id = id,
       _nome = nome,
         this._apelido = apelido,
         this._dataDeInscricao = dataDeInscricao,
