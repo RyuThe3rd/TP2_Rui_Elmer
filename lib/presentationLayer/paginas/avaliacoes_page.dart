@@ -1,10 +1,14 @@
+import 'package:tp2_rui_elmer/dataLayer/models/DisciplinaModelo.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../dominio/entidades/avaliacao.dart';
-import '../../dominio/entidades/disciplina.dart';
-import '../../dominio/entidades/enums.dart';
-import '../../dominio/entidades/estudante.dart';
-import '../providers/gestao_escolar_provider.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/avaliacao.dart';
+import 'package:collection/collection.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/estudante.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/disciplina.dart';
+import '../providers/AvaliacaoProvider.dart';
+import '../providers/DisciplinaProvider.dart';
+import '../providers/EstudanteProvider.dart';
 
 class AvaliacoesPage extends StatelessWidget {
   const AvaliacoesPage({super.key});
@@ -20,28 +24,46 @@ class AvaliacoesPage extends StatelessWidget {
   }
 
   Future<void> _abrirFormulario(BuildContext context, Avaliacao? avaliacao) async {
-    final provider = context.read<GestaoEscolarProvider>();
-    
-    if (provider.estudantes.isEmpty || provider.disciplinas.isEmpty) {
+    final avaProv = context.read<AvaliacaoProvider>();
+    final estProv = context.read<EstudanteProvider>();
+    final discProv = context.read<DisciplinaProvider>();
+
+    if (estProv.estudantes.isEmpty || discProv.disciplinas.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastre estudantes e disciplinas primeiro.')),
       );
       return;
     }
 
-    final List<Disciplina> disciplinasComInscritos = provider.disciplinas;
+    final List<Disciplina> disciplinas = discProv.disciplinas;
 
-    String disciplinaId = avaliacao?.disciplinaId ?? disciplinasComInscritos.first.id!;
-    
-    List<Estudante> estudantesDisponiveis = provider.estudantesInscritosNaDisciplina(disciplinaId);
-    if (estudantesDisponiveis.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Não há estudantes inscritos nesta disciplina.')),
-        );
-        return;
+    String disciplinaId = avaliacao?.disciplinaId ?? (disciplinas.isNotEmpty ? disciplinas.first.id : '');
+
+    final disciplinaSelecionada = disciplinas.firstWhereOrNull(
+          (d) => d.id == avaliacao?.disciplinaId,
+    ) ?? disciplinas.firstOrNull;
+
+   if (disciplinaSelecionada == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhuma disciplina encontrada.')),
+      );
+      return;
     }
 
-    String estudanteId = avaliacao?.estudanteId ?? estudantesDisponiveis.first.id;
+
+    List<Estudante> estudantesDisponiveis = disciplinaSelecionada.alunos;
+
+    if (estudantesDisponiveis.isEmpty && avaliacao == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Esta disciplina não possui alunos inscritos. Inscreva-os na aba de Disciplinas.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    String estudanteId = avaliacao?.estudanteId ?? (estudantesDisponiveis.isNotEmpty ? estudantesDisponiveis.first.id : '');
     Avaliacoes tipo = avaliacao?.tipo ?? Avaliacoes.mt1;
     final notaController = TextEditingController(text: avaliacao?.nota.toString() ?? '');
 
@@ -64,14 +86,6 @@ class AvaliacoesPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Center(
-                      child: Container(
-                        width: 45,
-                        height: 5,
-                        decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(30)),
-                      ),
-                    ),
-                    const SizedBox(height: 22),
                     Text(
                       avaliacao == null ? 'Lançar avaliação' : 'Editar avaliação',
                       style: const TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
@@ -79,33 +93,36 @@ class AvaliacoesPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: disciplinaId,
-                      decoration: const InputDecoration(labelText: 'Disciplina', prefixIcon: Icon(Icons.menu_book_outlined)),
-                      items: disciplinasComInscritos
+                      decoration: const InputDecoration(labelText: 'Disciplina'),
+                      items: disciplinas
                           .map((d) => DropdownMenuItem(value: d.id, child: Text(d.nome)))
                           .toList(),
                       onChanged: (value) {
                         setSheetState(() {
                           disciplinaId = value ?? disciplinaId;
-                          estudantesDisponiveis = provider.estudantesInscritosNaDisciplina(disciplinaId);
+                          estudantesDisponiveis = disciplinas
+                              .firstWhere((d) => d.id == disciplinaId).alunos;
                           if (estudantesDisponiveis.isNotEmpty) {
                             estudanteId = estudantesDisponiveis.first.id;
+                          } else {
+                            estudanteId = '';
                           }
                         });
                       },
                     ),
                     const SizedBox(height: 14),
                     DropdownButtonFormField<String>(
-                      value: estudanteId,
-                      decoration: const InputDecoration(labelText: 'Estudante', prefixIcon: Icon(Icons.person_outline)),
+                      value: estudanteId.isEmpty ? null : estudanteId,
+                      decoration: const InputDecoration(labelText: 'Estudante'),
                       items: estudantesDisponiveis
-                          .map((e) => DropdownMenuItem(value: e.id, child: Text(e.nomeCompleto)))
+                          .map((e) => DropdownMenuItem(value: e.id, child: Text(e.nome+' '+e.apelido)))
                           .toList(),
                       onChanged: (value) => setSheetState(() => estudanteId = value ?? estudanteId),
                     ),
                     const SizedBox(height: 14),
                     DropdownButtonFormField<Avaliacoes>(
                       value: tipo,
-                      decoration: const InputDecoration(labelText: 'Tipo de avaliação', prefixIcon: Icon(Icons.assignment_outlined)),
+                      decoration: const InputDecoration(labelText: 'Tipo de avaliação'),
                       items: Avaliacoes.values
                           .map((t) => DropdownMenuItem(value: t, child: Text(t.label)))
                           .toList(),
@@ -115,45 +132,33 @@ class AvaliacoesPage extends StatelessWidget {
                     TextField(
                       controller: notaController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        labelText: 'Nota',
-                        prefixIcon: Icon(Icons.grade_outlined),
-                        hintText: '0 a 20',
-                      ),
+                      decoration: const InputDecoration(labelText: 'Nota'),
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
-                      child: FilledButton.icon(
-                        icon: const Icon(Icons.save_outlined),
-                        label: const Text('Guardar avaliação'),
+                      child: FilledButton(
                         onPressed: () async {
                           final nota = double.tryParse(notaController.text.trim().replaceAll(',', '.'));
-                          if (nota == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Informe uma nota válida.')));
-                            return;
-                          }
+                          if (nota == null) return;
+                          if (estudanteId.isEmpty) return;
 
-                          final estudante = provider.estudantes.firstWhere((e) => e.id == estudanteId);
+                          final estudante = estudantesDisponiveis.firstWhere((e) => e.id == estudanteId);
 
-                          try {
-                            await provider.salvarAvaliacao(
-                              Avaliacao(
-                                id: avaliacao?.id,
-                                tipo: tipo,
-                                estudante: estudante.nomeCompleto,
-                                estudanteId: estudanteId,
-                                disciplinaId: disciplinaId,
-                                nota: nota,
-                                data: avaliacao?.data ?? DateTime.now(),
-                              ),
-                            );
-                            if (sheetContext.mounted) Navigator.pop(sheetContext);
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                          }
+                          await avaProv.salvar(
+                            Avaliacao(
+                              id: avaliacao?.id ?? '-1',
+                              tipo: tipo,
+                              estudante: estudante.nome+' '+estudante.apelido,
+                              estudanteId: estudanteId,
+                              disciplinaId: disciplinaId,
+                              nota: nota,
+                              data: avaliacao?.data ?? DateTime.now(),
+                            ),
+                          );
+                          if (sheetContext.mounted) Navigator.pop(sheetContext);
                         },
+                        child: const Text('Guardar'),
                       ),
                     ),
                   ],
@@ -168,8 +173,10 @@ class AvaliacoesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<GestaoEscolarProvider>(
+    return Consumer<AvaliacaoProvider>(
       builder: (context, provider, _) {
+        final avaliacoes = provider.avaliacoes;
+
         return Scaffold(
           body: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -192,7 +199,7 @@ class AvaliacoesPage extends StatelessWidget {
                           children: [
                             const Text('Avaliações', style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 5),
-                            Text('${provider.avaliacoes.length} avaliação(ões) lançada(s)', style: const TextStyle(color: Colors.white70)),
+                            Text('${avaliacoes.length} avaliação(ões) lançada(s)', style: const TextStyle(color: Colors.white70)),
                           ],
                         ),
                       ),
@@ -202,7 +209,7 @@ class AvaliacoesPage extends StatelessWidget {
               ),
               if (provider.carregando)
                 const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
-              else if (provider.avaliacoes.isEmpty)
+              else if (avaliacoes.isEmpty)
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(top: 80),
@@ -215,7 +222,7 @@ class AvaliacoesPage extends StatelessWidget {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final avaliacao = provider.avaliacoes[index];
+                        final avaliacao = avaliacoes[index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 14),
                           decoration: BoxDecoration(
@@ -232,26 +239,17 @@ class AvaliacoesPage extends StatelessWidget {
                                 style: TextStyle(color: _corNota(avaliacao.nota), fontWeight: FontWeight.bold),
                               ),
                             ),
-                            title: Text(avaliacao.estudante, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text('${provider.nomeDisciplina(avaliacao.disciplinaId)}\n${avaliacao.tipo.label} • ${_data(avaliacao.data)}'),
+                            title: Text(avaliacao.estudante),
+                            subtitle: Text('${provider.getNomeDisciplina(avaliacao.disciplinaId)} - ${avaliacao.tipo.label} • ${_data(avaliacao.data)}'),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => provider.remover(avaliacao.id),
                             ),
-                            isThreeLine: true,
-                            trailing: PopupMenuButton<String>(
-                              onSelected: (value) {
-                                if (value == 'editar') _abrirFormulario(context, avaliacao);
-                                if (value == 'remover') provider.removerAvaliacao(avaliacao.id);
-                              },
-                              itemBuilder: (context) => const [
-                                PopupMenuItem(value: 'editar', child: Text('Editar')),
-                                PopupMenuItem(value: 'remover', child: Text('Remover')),
-                              ],
-                            ),
+                            onTap: () => _abrirFormulario(context, avaliacao),
                           ),
                         );
                       },
-                      childCount: provider.avaliacoes.length,
+                      childCount: avaliacoes.length,
                     ),
                   ),
                 ),

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-
-import '../../dominio/entidades/estudante.dart';
-import '../controllers/gestao_escolar_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:tp2_rui_elmer/presentationLayer/providers/EstudanteProvider.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/estudante.dart';
 
 class EstudantesPage extends StatefulWidget {
-  final GestaoEscolarController controller;
-
-  const EstudantesPage({super.key, required this.controller});
+  const EstudantesPage({super.key});
 
   @override
   State<EstudantesPage> createState() => _EstudantesPageState();
@@ -24,18 +22,17 @@ class _EstudantesPageState extends State<EstudantesPage> {
     super.dispose();
   }
 
-  String _iniciais(String nome) {
-    final partes = nome.trim().split(RegExp(r'\s+'));
-    if (partes.isEmpty || partes.first.isEmpty) return 'E';
-    if (partes.length == 1) return partes.first[0].toUpperCase();
-    return '${partes.first[0]}${partes.last[0]}'.toUpperCase();
+  String _iniciais(String nome, String apelido) {
+    if (nome.isEmpty) return 'E';
+    return '${nome[0]}${apelido.isNotEmpty ? apelido[0] : ""}'.toUpperCase();
   }
 
   Future<void> _abrirFormulario(BuildContext context, Estudante? estudante) async {
+    final provider = context.read<EstudanteProvider>();
     final nomeController = TextEditingController(text: estudante?.nome ?? '');
     final apelidoController = TextEditingController(text: estudante?.apelido ?? '');
     final turmaController = TextEditingController(text: estudante?.turma ?? '');
-    String curso = estudante?.curso ?? cursos.first;
+    String cursoSelected = estudante?.curso ?? cursos.first;
 
     await showModalBottomSheet(
       context: context,
@@ -104,7 +101,6 @@ class _EstudantesPageState extends State<EstudantesPage> {
                         const SizedBox(height: 22),
                         TextField(
                           controller: nomeController,
-                          textCapitalization: TextCapitalization.words,
                           decoration: const InputDecoration(
                             labelText: 'Nome',
                             prefixIcon: Icon(Icons.person_outline),
@@ -113,7 +109,6 @@ class _EstudantesPageState extends State<EstudantesPage> {
                         const SizedBox(height: 14),
                         TextField(
                           controller: apelidoController,
-                          textCapitalization: TextCapitalization.words,
                           decoration: const InputDecoration(
                             labelText: 'Apelido',
                             prefixIcon: Icon(Icons.person_2_outlined),
@@ -121,7 +116,7 @@ class _EstudantesPageState extends State<EstudantesPage> {
                         ),
                         const SizedBox(height: 14),
                         DropdownButtonFormField<String>(
-                          value: curso,
+                          value: cursoSelected,
                           decoration: const InputDecoration(
                             labelText: 'Curso',
                             prefixIcon: Icon(Icons.school_outlined),
@@ -130,7 +125,7 @@ class _EstudantesPageState extends State<EstudantesPage> {
                               .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                               .toList(),
                           onChanged: (value) {
-                            setSheetState(() => curso = value ?? curso);
+                            setSheetState(() => cursoSelected = value ?? cursoSelected);
                           },
                         ),
                         const SizedBox(height: 14),
@@ -163,12 +158,12 @@ class _EstudantesPageState extends State<EstudantesPage> {
                               }
 
                               try {
-                                await widget.controller.salvarEstudante(
+                                await provider.salvar(
                                   Estudante(
-                                    id: estudante?.id,
+                                    id: estudante?.id ?? '-1',
                                     nome: nome,
                                     apelido: apelido,
-                                    curso: curso,
+                                    curso: cursoSelected,
                                     turma: turma,
                                     dataDeInscricao: estudante?.dataDeInscricao ?? DateTime.now(),
                                   ),
@@ -196,12 +191,12 @@ class _EstudantesPageState extends State<EstudantesPage> {
   }
 
   Future<void> _confirmarRemocao(BuildContext context, Estudante estudante) async {
+    final provider = context.read<EstudanteProvider>();
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Remover estudante'),
-        content: Text('Tens certeza que desejas remover ${estudante.nomeCompleto}?'),
+        content: Text('Tens certeza que desejas remover ${estudante.nome+' '+estudante.apelido}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -218,7 +213,7 @@ class _EstudantesPageState extends State<EstudantesPage> {
     );
 
     if (confirmar == true) {
-      await widget.controller.removerEstudante(estudante.id);
+      await provider.remover(estudante.id);
     }
   }
 
@@ -275,115 +270,15 @@ class _EstudantesPageState extends State<EstudantesPage> {
     );
   }
 
-  Widget _cardEstudante(BuildContext context, Estudante estudante) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.07),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 32,
-              backgroundColor: const Color(0xFFDBEAFE),
-              child: Text(
-                _iniciais(estudante.nomeCompleto),
-                style: const TextStyle(
-                  color: Color(0xFF1E40AF),
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    estudante.nomeCompleto,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(Icons.groups_2_outlined, size: 16, color: Colors.black45),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Text(
-                          'Turma ${estudante.turma}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Text(
-                      estudante.curso,
-                      style: const TextStyle(
-                        color: Color(0xFF2563EB),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            PopupMenuButton<String>(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              onSelected: (value) {
-                if (value == 'editar') _abrirFormulario(context, estudante);
-                if (value == 'remover') _confirmarRemocao(context, estudante);
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem(
-                  value: 'editar',
-                  child: Row(children: [Icon(Icons.edit_outlined), SizedBox(width: 8), Text('Editar')]),
-                ),
-                PopupMenuItem(
-                  value: 'remover',
-                  child: Row(children: [Icon(Icons.delete_outline, color: Colors.red), SizedBox(width: 8), Text('Remover')]),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.controller,
-      builder: (context, _) {
-        final estudantes = widget.controller.estudantes;
-        final estudantesFiltrados = estudantes.where((estudante) {
-          final texto = '${estudante.nomeCompleto} ${estudante.turma} ${estudante.curso}'.toLowerCase();
+    return Consumer<EstudanteProvider>(
+      builder: (context, provider, _) {
+        final estudantesFiltrados = provider.estudantes.where((estudante) {
+          final texto = '${estudante.nome+' '+estudante.apelido} ${estudante.turma} ${estudante.curso}'.toLowerCase();
           return texto.contains(pesquisa.toLowerCase());
         }).toList();
-        final totalCursos = estudantes.map((e) => e.curso).toSet().length;
+        final totalCursos = provider.estudantes.map((e) => e.curso).toSet().length;
 
         return Scaffold(
           body: CustomScrollView(
@@ -420,7 +315,7 @@ class _EstudantesPageState extends State<EstudantesPage> {
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          _cardResumo(Icons.people_alt_outlined, 'Estudantes', '${estudantes.length}'),
+                          _cardResumo(Icons.people_alt_outlined, 'Estudantes', '${provider.estudantes.length}'),
                           const SizedBox(width: 12),
                           _cardResumo(Icons.menu_book_outlined, 'Cursos', '$totalCursos'),
                         ],
@@ -461,14 +356,106 @@ class _EstudantesPageState extends State<EstudantesPage> {
                   ),
                 ),
               ),
-              if (estudantesFiltrados.isEmpty)
+              if (provider.carregando)
+                const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+              else if (estudantesFiltrados.isEmpty)
                 SliverToBoxAdapter(child: _estadoVazio())
               else
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 18, 16, 100),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) => _cardEstudante(context, estudantesFiltrados[index]),
+                      (context, index) {
+                        final estudante = estudantesFiltrados[index];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.07),
+                                blurRadius: 16,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 32,
+                                  backgroundColor: const Color(0xFFDBEAFE),
+                                  child: Text(
+                                    _iniciais(estudante.nome, estudante.apelido),
+                                    style: const TextStyle(
+                                      color: Color(0xFF1E40AF),
+                                      fontSize: 19,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        estudante.nome+' '+estudante.apelido,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.groups_2_outlined, size: 16, color: Colors.black45),
+                                          const SizedBox(width: 5),
+                                          Expanded(
+                                            child: Text(
+                                              'Turma ${estudante.turma}',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(color: Colors.black54),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFEFF6FF),
+                                          borderRadius: BorderRadius.circular(30),
+                                        ),
+                                        child: Text(
+                                          estudante.curso,
+                                          style: const TextStyle(
+                                            color: Color(0xFF2563EB),
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuButton<String>(
+                                  onSelected: (value) {
+                                    if (value == 'editar') _abrirFormulario(context, estudante);
+                                    if (value == 'remover') _confirmarRemocao(context, estudante);
+                                  },
+                                  itemBuilder: (context) => const [
+                                    PopupMenuItem(value: 'editar', child: Text('Editar')),
+                                    PopupMenuItem(value: 'remover', child: Text('Remover')),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                       childCount: estudantesFiltrados.length,
                     ),
                   ),

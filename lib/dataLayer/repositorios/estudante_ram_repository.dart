@@ -43,5 +43,5 @@ class EstudanteRamImpl implements EstudanteContrato {
   }
 
   @override
-  Future<Estudante?> buscarPorId(String id) async => _dados[id];
+  Future<EstudanteModelo?> buscarPorId(String id) async => _dados[id];
 }

@@ -30,13 +30,13 @@ class AvaliacaoRamImpl implements AvaliacaoContrato {
   }
 
   @override
-  Future<List<AvaliacaoModelo>> listar() async => _dados.values.toList();
+  Future<List<Avaliacao>> listar() async => _dados.values.toList();
 
   @override
-  Future<List<AvaliacaoModelo>> listarPorDisciplina(String disciplinaId) async {
+  Future<List<Avaliacao>> listarPorDisciplina(String disciplinaId) async {
     return _dados.values.where((a) => a.disciplinaId == disciplinaId).toList();
   }
 
   @override
-  Future<AvaliacaoModelo?> buscarPorId(String id) async => _dados[id];
+  Future<Avaliacao?> buscarPorId(String id) async => _dados[id];
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-
-import '../../dominio/entidades/disciplina.dart';
-import '../controllers/gestao_escolar_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/enums.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/estudante.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/disciplina.dart';
+import 'package:tp2_rui_elmer/presentationLayer/providers/DisciplinaProvider.dart';
 
 class DisciplinasPage extends StatefulWidget {
-  final GestaoEscolarController controller;
-
-  const DisciplinasPage({super.key, required this.controller});
+  const DisciplinasPage({super.key});
 
   @override
   State<DisciplinasPage> createState() => _DisciplinasPageState();
@@ -16,6 +16,7 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
   final List<String> cursos = const ['LECC', 'LEIT', 'OUTROS'];
 
   Future<void> _abrirFormulario(BuildContext context, Disciplina? disciplina) async {
+    final provider = context.read<DisciplinaProvider>();
     final nomeController = TextEditingController(text: disciplina?.nome ?? '');
     final descricaoController = TextEditingController(text: disciplina?.descricao ?? '');
     String curso = disciplina?.curso ?? cursos.first;
@@ -96,7 +97,7 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
                             return;
                           }
                           try {
-                            await widget.controller.salvarDisciplina(
+                            await provider.salvar(
                               Disciplina(
                                 id: disciplina?.id,
                                 nome: nome,
@@ -122,7 +123,8 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
     );
   }
 
-  Future<void> _remover(Disciplina disciplina) async {
+  Future<void> _remover(BuildContext context, Disciplina disciplina) async {
+    final provider = context.read<DisciplinaProvider>();
     final ok = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -139,15 +141,14 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
         ],
       ),
     );
-    if (ok == true) await widget.controller.removerDisciplina(disciplina.id);
+    if (ok == true) await provider.remover(disciplina.id);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.controller,
-      builder: (context, _) {
-        final disciplinas = widget.controller.disciplinas;
+    return Consumer<DisciplinaProvider>(
+      builder: (context, provider, _) {
+        final disciplinas = provider.disciplinas;
 
         return Scaffold(
           body: CustomScrollView(
@@ -179,7 +180,9 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
                   ),
                 ),
               ),
-              if (disciplinas.isEmpty)
+              if (provider.carregando)
+                const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+              else if (disciplinas.isEmpty)
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(top: 80),
@@ -203,7 +206,7 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
                           child: ListTile(
                             contentPadding: const EdgeInsets.all(14),
                             leading: CircleAvatar(
-                              backgroundColor: const Color(0xFFE0E7FF),
+                              backgroundColor: const Color.fromARGB(255, 224, 231, 255),
                               child: Text(disciplina.nome.isNotEmpty ? disciplina.nome[0].toUpperCase() : 'D'),
                             ),
                             title: Text(disciplina.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -215,7 +218,7 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
                             trailing: PopupMenuButton<String>(
                               onSelected: (value) {
                                 if (value == 'editar') _abrirFormulario(context, disciplina);
-                                if (value == 'remover') _remover(disciplina);
+                                if (value == 'remover') _remover(context, disciplina);
                               },
                               itemBuilder: (context) => const [
                                 PopupMenuItem(value: 'editar', child: Text('Editar')),

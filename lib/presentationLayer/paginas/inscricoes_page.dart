@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/gestao_escolar_provider.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/enums.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/estudante.dart';
+import 'package:tp2_rui_elmer/dominio/entidades/disciplina.dart';
+import 'package:tp2_rui_elmer/presentationLayer/providers/DisciplinaProvider.dart';
+import 'package:tp2_rui_elmer/presentationLayer/providers/EstudanteProvider.dart';
+
 
 class InscricoesPage extends StatelessWidget {
   const InscricoesPage({super.key});
@@ -10,17 +15,18 @@ class InscricoesPage extends StatelessWidget {
   }
 
   Future<void> _abrirFormulario(BuildContext context) async {
-    final provider = context.read<GestaoEscolarProvider>();
+    final discProvider = context.read<DisciplinaProvider>();
+    final estProvider = context.read<EstudanteProvider>();
     
-    if (provider.estudantes.isEmpty || provider.disciplinas.isEmpty) {
+    if (estProvider.estudantes.isEmpty || discProvider.disciplinas.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cadastre estudantes e disciplinas primeiro.')),
       );
       return;
     }
 
-    String estudanteId = provider.estudantes.first.id;
-    String disciplinaId = provider.disciplinas.first.id;
+    String estudanteId = estProvider.estudantes.first.id;
+    String disciplinaId = discProvider.disciplinas.first.id;
 
     await showModalBottomSheet(
       context: context,
@@ -53,8 +59,8 @@ class InscricoesPage extends StatelessWidget {
                   DropdownButtonFormField<String>(
                     value: estudanteId,
                     decoration: const InputDecoration(labelText: 'Estudante', prefixIcon: Icon(Icons.person_outline)),
-                    items: provider.estudantes
-                        .map((e) => DropdownMenuItem(value: e.id, child: Text(e.nomeCompleto)))
+                    items: estProvider.estudantes
+                        .map((e) => DropdownMenuItem(value: e.id, child: Text(e.nome+' '+e.apelido)))
                         .toList(),
                     onChanged: (value) => setSheetState(() => estudanteId = value ?? estudanteId),
                   ),
@@ -62,7 +68,7 @@ class InscricoesPage extends StatelessWidget {
                   DropdownButtonFormField<String>(
                     value: disciplinaId,
                     decoration: const InputDecoration(labelText: 'Disciplina', prefixIcon: Icon(Icons.menu_book_outlined)),
-                    items: provider.disciplinas
+                    items: discProvider.disciplinas
                         .map((d) => DropdownMenuItem(value: d.id, child: Text(d.nome)))
                         .toList(),
                     onChanged: (value) => setSheetState(() => disciplinaId = value ?? disciplinaId),
@@ -76,7 +82,7 @@ class InscricoesPage extends StatelessWidget {
                       label: const Text('Inscrever estudante'),
                       onPressed: () async {
                         try {
-                          await provider.inscreverEstudante(estudanteId, disciplinaId);
+                          await discProvider.inscreverEstudante(estudanteId, disciplinaId);
                           if (sheetContext.mounted) Navigator.pop(sheetContext);
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -95,8 +101,15 @@ class InscricoesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<GestaoEscolarProvider>(
+    return Consumer<DisciplinaProvider>(
       builder: (context, provider, _) {
+        final List<_InscricaoView> todasInscricoes = [];
+        for (var d in provider.disciplinas) {
+          for (var e in d.alunos) {
+            todasInscricoes.add(_InscricaoView(estudante: e, disciplina: d));
+          }
+        }
+
         return Scaffold(
           body: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -119,7 +132,7 @@ class InscricoesPage extends StatelessWidget {
                           children: [
                             const Text('Inscrições', style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 5),
-                            Text('${provider.inscricoes.length} inscrição(ões)', style: const TextStyle(color: Colors.white70)),
+                            Text('${todasInscricoes.length} inscrição(ões)', style: const TextStyle(color: Colors.white70)),
                           ],
                         ),
                       ),
@@ -127,9 +140,7 @@ class InscricoesPage extends StatelessWidget {
                   ),
                 ),
               ),
-              if (provider.carregando)
-                const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
-              else if (provider.inscricoes.isEmpty)
+              if (todasInscricoes.isEmpty)
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(top: 80),
@@ -142,7 +153,7 @@ class InscricoesPage extends StatelessWidget {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final inscricao = provider.inscricoes[index];
+                        final item = todasInscricoes[index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 14),
                           decoration: BoxDecoration(
@@ -156,20 +167,15 @@ class InscricoesPage extends StatelessWidget {
                               backgroundColor: Color(0xFFD1FAE5),
                               child: Icon(Icons.check_circle_outline, color: Color(0xFF047857)),
                             ),
-                            title: Text(provider.nomeEstudante(inscricao.estudanteId), style: const TextStyle(fontWeight: FontWeight.bold)),
+                            title: Text(item.estudante.nome +' '+ item.estudante.apelido, style: const TextStyle(fontWeight: FontWeight.bold)),
                             subtitle: Padding(
                               padding: const EdgeInsets.only(top: 4),
-                              child: Text('${provider.nomeDisciplina(inscricao.disciplinaId)}\nData: ${_data(inscricao.dataInscricao)}'),
-                            ),
-                            isThreeLine: true,
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline, color: Colors.red),
-                              onPressed: () => provider.removerInscricao(inscricao.id),
+                              child: Text(item.disciplina.nome),
                             ),
                           ),
                         );
                       },
-                      childCount: provider.inscricoes.length,
+                      childCount: todasInscricoes.length,
                     ),
                   ),
                 ),
@@ -184,4 +190,10 @@ class InscricoesPage extends StatelessWidget {
       },
     );
   }
+}
+
+class _InscricaoView {
+  final Estudante estudante;
+  final Disciplina disciplina;
+  _InscricaoView({required this.estudante, required this.disciplina});
 }

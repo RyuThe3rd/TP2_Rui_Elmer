@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../controllers/gestao_escolar_controller.dart';
 import 'avaliacoes_page.dart';
 import 'disciplinas_page.dart';
 import 'estudantes_page.dart';
@@ -15,17 +14,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late final GestaoEscolarController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = GestaoEscolarController();
+
   }
 
   @override
   void dispose() {
-    controller.dispose();
     super.dispose();
   }
 
@@ -36,14 +33,14 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'Sistema Escolar',
+                'Sistema Escolar - Elmer & Rui',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                'Gestão académica - branchRui',
+                'Gestão académica',
                 style: TextStyle(fontSize: 12, color: Colors.black54),
               ),
             ],
@@ -63,11 +60,11 @@ class _HomePageState extends State<HomePage> {
         ),
         body: TabBarView(
           children: [
-            EstudantesPage(controller: controller),
-            DisciplinasPage(controller: controller),
-            InscricoesPage(controller: controller),
-            AvaliacoesPage(controller: controller),
-            NotasPage(controller: controller),
+            EstudantesPage(),
+            DisciplinasPage(),
+            InscricoesPage(),
+            AvaliacoesPage(),
+            NotasPage(),
           ],
         ),
       ),

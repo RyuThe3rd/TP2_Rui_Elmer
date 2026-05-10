@@ -1,9 +1,12 @@
+import 'package:tp2_rui_elmer/dominio/entidades/enums.dart';
 import '../contratos/avaliacaoContrato.dart';
 import '../entidades/avaliacao.dart';
-import '../entidades/enums.dart';
+
 
 class CriarAvaliacao {
+
   final AvaliacaoContrato _repositorio;
+
   CriarAvaliacao(this._repositorio);
 
   Future<Avaliacao> executar({

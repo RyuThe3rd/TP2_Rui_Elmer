@@ -30,9 +30,9 @@ class ConsultarNotaPorDisciplina {
         'nota': avaliacao.nota
       };
     }
-      ).toList();
+    ).toList();
 
     return await Future.wait(listaNotas);
 
-    }
+  }
 }

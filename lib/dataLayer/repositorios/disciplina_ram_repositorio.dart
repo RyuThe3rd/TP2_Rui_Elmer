@@ -21,6 +21,7 @@ class DisciplinaRamImpl implements DisciplinaContrato {
       dataDeCriacao: disciplina.dataDeCriacao,
       curso: disciplina.curso,
       descricao: disciplina.descricao,
+      alunosIniciais: disciplina.alunos,
     );
 
     _dados[id] = modelo;
@@ -33,12 +34,12 @@ class DisciplinaRamImpl implements DisciplinaContrato {
   }
 
   @override
-  Future<List<Disciplina>> listar() async {
+  Future<List<DisciplinaModelo>> listar() async {
     final lista = _dados.values.toList();
     lista.sort((a, b) => a.nome.compareTo(b.nome));
     return lista;
   }
 
   @override
-  Future<Disciplina?> buscarPorId(String id) async => _dados[id];
+  Future<DisciplinaModelo?> buscarPorId(String id) async => _dados[id];
 }

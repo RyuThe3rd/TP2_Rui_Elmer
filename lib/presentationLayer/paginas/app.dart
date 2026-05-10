@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'apresentacao/telas/home_page.dart';
+import 'package:tp2_rui_elmer/presentationLayer/paginas/home_page.dart';
 
 class GestaoEscolarApp extends StatelessWidget {
   const GestaoEscolarApp({super.key});

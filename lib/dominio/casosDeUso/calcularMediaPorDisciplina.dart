@@ -16,15 +16,12 @@ class CalcularMediaPorDisciplina {
     final avaliacoes = await avaliacaoContrato.listarPorDisciplina(disciplinaId);
 
     double notas = 0;
-    double somaDenominador = 0;
     for(var temp in avaliacoes) {
-          notas += temp.nota * temp.tipo.peso;
-          somaDenominador += temp.tipo.peso;
+      notas += temp.nota;
+
     }
 
-    if (somaDenominador == 0) return 0.0;
-
-    double media = notas / somaDenominador;
+    double media = notas / avaliacoes.length;
 
     return media;
 
