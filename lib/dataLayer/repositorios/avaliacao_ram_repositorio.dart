@@ -5,8 +5,7 @@ import 'package:tp2_rui_elmer/dominio/entidades/avaliacao.dart';
 
 class AvaliacaoRamImpl implements AvaliacaoContrato {
   static int _proximoId = 0;
-
-  final Map<String,AvaliacaoModelo> _dados = {};
+  final Map<String, AvaliacaoModelo> _dados = {};
 
   @override
   Future<void> salvar(Avaliacao avaliacao) async {
@@ -31,11 +30,7 @@ class AvaliacaoRamImpl implements AvaliacaoContrato {
   }
 
   @override
-  Future<List<AvaliacaoModelo>> listar() async {
-    final lista = _dados.values.toList();
-    lista.sort((a, b) => a.titulo.compareTo(b.titulo));
-    return lista;
-  }
+  Future<List<AvaliacaoModelo>> listar() async => _dados.values.toList();
 
   @override
   Future<List<AvaliacaoModelo>> listarPorDisciplina(String disciplinaId) async {

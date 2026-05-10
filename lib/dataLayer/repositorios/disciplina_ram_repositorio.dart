@@ -1,5 +1,5 @@
-import 'package:tp2_rui_elmer/dominio/contratos/disciplinaContrato.dart';
 import 'package:tp2_rui_elmer/dataLayer/models/DisciplinaModelo.dart';
+import 'package:tp2_rui_elmer/dominio/contratos/disciplinaContrato.dart';
 import 'package:tp2_rui_elmer/dominio/entidades/disciplina.dart';
 
 class DisciplinaRamImpl implements DisciplinaContrato {
@@ -9,18 +9,22 @@ class DisciplinaRamImpl implements DisciplinaContrato {
 
   @override
   Future<void> salvar(Disciplina disciplina) async {
-    _proximoId++;
+    String? id = disciplina.id;
+    if (id == null || id.isEmpty || id == '-1') {
+      _proximoId++;
+      id = _proximoId.toString();
+    }
 
     final modelo = DisciplinaModelo(
-      id: _proximoId.toString(),
+      id: id,
       nome: disciplina.nome,
       dataDeCriacao: disciplina.dataDeCriacao,
       curso: disciplina.curso,
       descricao: disciplina.descricao,
     );
 
-
-    _dados[modelo.id] = modelo;
+    _dados[id] = modelo;
+    disciplina.id = id;
   }
 
   @override
@@ -29,12 +33,12 @@ class DisciplinaRamImpl implements DisciplinaContrato {
   }
 
   @override
-  Future<List<DisciplinaModelo>> listar() async {
+  Future<List<Disciplina>> listar() async {
     final lista = _dados.values.toList();
     lista.sort((a, b) => a.nome.compareTo(b.nome));
     return lista;
   }
 
   @override
-  Future<DisciplinaModelo?> buscarPorId(String id) async => _dados[id];
+  Future<Disciplina?> buscarPorId(String id) async => _dados[id];
 }

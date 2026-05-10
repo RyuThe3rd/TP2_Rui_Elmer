@@ -1,10 +1,11 @@
+import 'package:tp2_rui_elmer/dataLayer/models/EstudanteModelo.dart';
 import 'package:tp2_rui_elmer/dominio/contratos/estudanteContrato.dart';
 import 'package:tp2_rui_elmer/dominio/entidades/estudante.dart';
 
 class EstudanteRamImpl implements EstudanteContrato {
   static int _proximoId = 0;
 
-  final Map<String, Estudante> _dados = {};
+  final Map<String, EstudanteModelo> _dados = {};
 
   @override
   Future<void> salvar(Estudante estudante) async {
@@ -12,15 +13,14 @@ class EstudanteRamImpl implements EstudanteContrato {
 
     final modelo = EstudanteModelo(
       id: _proximoId.toString(),
-      tipo: avaliacao.tipo,
-      estudante: avaliacao.estudante,
-      estudanteId: avaliacao.estudanteId,
-      data: avaliacao.data,
-      disciplinaId: avaliacao.disciplinaId,
-      nota: avaliacao.nota,
+      nome: estudante.nome,
+      dataDeInscricao: estudante.dataDeInscricao,
+      turma: estudante.turma,
+      apelido: estudante.apelido,
+      curso: estudante.curso,
     );
 
-    _dados[estudante.id] = estudante;
+    _dados[modelo.id] =modelo;
   }
 
   @override
@@ -29,7 +29,7 @@ class EstudanteRamImpl implements EstudanteContrato {
   }
 
   @override
-  Future<List<Estudante>> listar(bool maisRecente) async {
+  Future<List<EstudanteModelo>> listar(bool maisRecente) async {
     final lista = _dados.values.toList();
 
     if (maisRecente) {
