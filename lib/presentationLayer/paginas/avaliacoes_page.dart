@@ -77,7 +77,7 @@ class AvaliacoesPage extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(22),
             decoration: const BoxDecoration(
-              color: Color(0xFFF8FAFC),
+              color: Color.fromARGB(255, 248, 250, 252),
               borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
             ),
             child: SafeArea(
@@ -186,7 +186,10 @@ class AvaliacoesPage extends StatelessWidget {
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF7C2D12), Color(0xFFEA580C)]),
+                    gradient: const LinearGradient(colors: [
+                      Color.fromARGB(255, 124, 45, 18),
+                      Color.fromARGB(255, 234, 88, 12),
+                    ],),
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: Row(

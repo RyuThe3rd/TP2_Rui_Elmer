@@ -38,7 +38,7 @@ class InscricoesPage extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(22),
             decoration: const BoxDecoration(
-              color: Color(0xFFF8FAFC),
+              color: Color.fromARGB(255, 248, 250, 252),
               borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
             ),
             child: SafeArea(
@@ -119,7 +119,7 @@ class InscricoesPage extends StatelessWidget {
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF064E3B), Color(0xFF059669)]),
+                    gradient: const LinearGradient(colors: [Color.fromARGB(255, 6, 78, 59), Color.fromARGB(255, 5, 150, 105)]),
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: Row(
@@ -164,8 +164,8 @@ class InscricoesPage extends StatelessWidget {
                           child: ListTile(
                             contentPadding: const EdgeInsets.all(14),
                             leading: const CircleAvatar(
-                              backgroundColor: Color(0xFFD1FAE5),
-                              child: Icon(Icons.check_circle_outline, color: Color(0xFF047857)),
+                              backgroundColor: Color.fromARGB(255, 209, 250, 229),
+                              child: Icon(Icons.check_circle_outline, color: Color.fromARGB(255, 4, 120, 87)),
                             ),
                             title: Text(item.estudante.nome +' '+ item.estudante.apelido, style: const TextStyle(fontWeight: FontWeight.bold)),
                             subtitle: Padding(

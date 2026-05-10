@@ -31,7 +31,7 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
           child: Container(
             padding: const EdgeInsets.all(22),
             decoration: const BoxDecoration(
-              color: Color(0xFFF8FAFC),
+              color: Color.fromARGB(255, 248, 250, 252),
               borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
             ),
             child: SafeArea(
@@ -52,8 +52,8 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: const Color(0xFFE0E7FF), borderRadius: BorderRadius.circular(16)),
-                          child: const Icon(Icons.menu_book_outlined, color: Color(0xFF4338CA)),
+                          decoration: BoxDecoration(color: const Color.fromARGB(255, 224, 231, 255), borderRadius: BorderRadius.circular(16)),
+                          child: const Icon(Icons.menu_book_outlined, color: Color.fromARGB(255, 67, 56, 202)),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -159,7 +159,9 @@ class _DisciplinasPageState extends State<DisciplinasPage> {
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF312E81), Color(0xFF4F46E5)]),
+                    gradient: const LinearGradient(colors: [Color.fromARGB(255, 49, 46, 129),
+                      Color.fromARGB(255, 79, 70, 229),
+                    ]),
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: Row(

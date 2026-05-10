@@ -289,7 +289,10 @@ class _EstudantesPageState extends State<EstudantesPage> {
                   padding: const EdgeInsets.fromLTRB(18, 20, 18, 24),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFF0F172A), Color(0xFF1D4ED8), Color(0xFF2563EB)],
+                      colors: [Color.fromARGB(255, 15, 23, 42),
+                        Color.fromARGB(255, 29, 78, 216),
+                        Color.fromARGB(255, 37, 99, 235)
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -386,7 +389,7 @@ class _EstudantesPageState extends State<EstudantesPage> {
                               children: [
                                 CircleAvatar(
                                   radius: 32,
-                                  backgroundColor: const Color(0xFFDBEAFE),
+                                  backgroundColor: const Color.fromARGB(255, 219, 234, 254),
                                   child: Text(
                                     _iniciais(estudante.nome, estudante.apelido),
                                     style: const TextStyle(
