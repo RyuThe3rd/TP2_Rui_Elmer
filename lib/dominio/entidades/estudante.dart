@@ -59,5 +59,9 @@ class Estudante {
     _nome = value;
   }
 
+  String nomeCompleto(){
+
+    return '${nome+' '+apelido}';
+  }
 
 }

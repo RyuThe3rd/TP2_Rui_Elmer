@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tp2_rui_elmer/dataLayer/repositorios/avaliacao_ram_repositorio.dart';
 import 'package:tp2_rui_elmer/dataLayer/repositorios/disciplina_ram_repositorio.dart';
 import 'package:tp2_rui_elmer/dataLayer/repositorios/estudante_ram_repository.dart';
-import 'package:tp2_rui_elmer/presentationLayer/paginas/app.dart';
+import 'package:tp2_rui_elmer/app.dart';
 import 'package:tp2_rui_elmer/presentationLayer/providers/AvaliacaoProvider.dart';
 import 'package:tp2_rui_elmer/presentationLayer/providers/DisciplinaProvider.dart';
 import 'package:tp2_rui_elmer/presentationLayer/providers/EstudanteProvider.dart';
