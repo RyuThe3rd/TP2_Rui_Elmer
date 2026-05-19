@@ -60,6 +60,4 @@ class Disciplina{
   set id(String value) {
     _id = value;
   }
-
-
 }
