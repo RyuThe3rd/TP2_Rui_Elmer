@@ -1,54 +1,74 @@
-enum TipoAvaliacao { teste, trabalho, exame, projeto }
 
-class Avaliacao {
-  final String id;
-  final String disciplinaId;
-  final String titulo;
-  final TipoAvaliacao tipo;
-  final double peso;
+import 'package:tp2_rui_elmer/dominio/entidades/enums.dart';
 
-  const Avaliacao({
-    required this.id,
-    required this.disciplinaId,
-    required this.titulo,
-    required this.tipo,
-    required this.peso,
-  });
 
-  Avaliacao copyWith({
+class Avaliacao{
+  String? _id;
+  Avaliacoes _tipo;
+  DateTime _data;
+  String _estudante;
+  String _estudanteId;
+  String _disciplinaId;
+  double _nota;
+
+  Avaliacao({
     String? id,
-    String? disciplinaId,
-    String? titulo,
-    TipoAvaliacao? tipo,
-    double? peso,
-  }) {
-    return Avaliacao(
-      id: id ?? this.id,
-      disciplinaId: disciplinaId ?? this.disciplinaId,
-      titulo: titulo ?? this.titulo,
-      tipo: tipo ?? this.tipo,
-      peso: peso ?? this.peso,
-    );
+    required Avaliacoes tipo,
+    required String estudante,
+    required String estudanteId,
+    required DateTime data,
+    required String disciplinaId,
+    required double nota}):
+        _id = id,
+        _estudanteId = estudanteId,
+        _tipo = tipo,
+        _disciplinaId = disciplinaId,
+        _data = data,
+        _estudante = estudante,
+        _nota = nota;
+
+  double get nota => _nota;
+
+  set nota(double value) {
+    _nota = value;
   }
 
-  Map<String, dynamic> toMap() => {
-        'id': id,
-        'disciplinaId': disciplinaId,
-        'titulo': titulo,
-        'tipo': tipo.name,
-        'peso': peso,
-      };
+  String get disciplinaId => _disciplinaId;
 
-  factory Avaliacao.fromMap(Map<String, dynamic> map) {
-    return Avaliacao(
-      id: map['id'] ?? '',
-      disciplinaId: map['disciplinaId'] ?? '',
-      titulo: map['titulo'] ?? '',
-      tipo: TipoAvaliacao.values.firstWhere(
-        (t) => t.name == map['tipo'],
-        orElse: () => TipoAvaliacao.teste,
-      ),
-      peso: (map['peso'] ?? 0).toDouble(),
-    );
+  set disciplinaId(String value) {
+    _disciplinaId = value;
   }
+
+  String get estudanteId => _estudanteId;
+
+  set estudanteId(String value) {
+    _estudanteId = value;
+  }
+
+  String get estudante => _estudante;
+
+  set estudante(String value) {
+    _estudante = value;
+  }
+
+  DateTime get data => _data;
+
+  set data(DateTime value) {
+    _data = value;
+  }
+
+  Avaliacoes get tipo => _tipo;
+
+  set tipo(Avaliacoes value) {
+    _tipo = value;
+  }
+
+  //quando apanhar -1 lançar uma mensagem  lá na tela, de que não foi encontrado
+  String get id => _id?? '-1';
+
+  set id(String value) {
+    _id = value;
+  }
+
+
 }

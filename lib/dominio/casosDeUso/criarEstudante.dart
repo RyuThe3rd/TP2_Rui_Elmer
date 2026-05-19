@@ -1,10 +1,12 @@
 
+import 'package:tp2_rui_elmer/dominio/contratos/estudanteContrato.dart';
+
 import 'gravarEstudante.dart';
 import 'package:tp2_rui_elmer/dominio/entidades/estudante.dart';
 
 class CriarEstudante {
 
-  final GravarEstudante _gravador;
+  final EstudanteContrato _gravador;
   CriarEstudante(this._gravador);
 
 
@@ -17,7 +19,7 @@ class CriarEstudante {
     final estudante = Estudante(nome: nome, apelido: apelido, dataDeInscricao: dataDeInscricao, turma: turma, curso: curso);
 
     //do tipo criarEstudante --<<includes>>--> gravarEstudante
-    _gravador.gravar(estudante);
+    _gravador.salvar(estudante);
 
     return estudante;
   }
